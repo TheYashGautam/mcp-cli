@@ -43,7 +43,10 @@ test("withLock reclaims a stale lock left by a crashed process", () => {
 
   const start = Date.now();
   withLock(resource, () => {});
-  assert.ok(Date.now() - start < 500, "stale lock should be reclaimed almost immediately");
+  // Generous margin for a loaded CI runner — the point is confirming it
+  // didn't wait through the full default 5000ms acquire timeout, not
+  // pinning down an exact fast duration.
+  assert.ok(Date.now() - start < 2000, "stale lock should be reclaimed quickly, not after waiting out the timeout");
   cleanupTempHome(dir);
 });
 
@@ -69,11 +72,16 @@ test("withLock times out with a clear error when another process genuinely holds
   );
 
   try {
-    // Give the holder a moment to actually acquire the lock before we race it.
-    const deadline = Date.now() + 500;
+    // Wait for the holder to actually acquire the lock before we race it.
+    // Spawning a node process + dynamic ESM import can be slow on a loaded
+    // CI runner, so this budget is generous — the moment the lock file
+    // appears, the holder just acquired it and will keep it for another
+    // ~1000ms regardless of how long spawning took, so there's no rush.
+    const deadline = Date.now() + 10_000;
     while (!fs.existsSync(`${resource}.lock`) && Date.now() < deadline) {
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 10);
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20);
     }
+    assert.ok(fs.existsSync(`${resource}.lock`), "holder process never acquired the lock — can't test contention");
 
     assert.throws(() => withLock(resource, () => {}, { timeoutMs: 200 }), /Timed out waiting for lock/);
   } finally {
