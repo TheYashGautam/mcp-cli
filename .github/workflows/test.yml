@@ -1,0 +1,28 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows is intentionally excluded: fs.chmodSync/stat().mode don't
+        # carry real POSIX permission bits there, so the permission-
+        # preservation assertions in test/clients.test.js and
+        # test/backup.test.js aren't meaningful on that platform. The
+        # Windows secret backend (src/secretstore/windows.js) is untested
+        # end-to-end for the same reason no CI runner here can verify it —
+        # see the README caveat.
+        os: [ubuntu-latest, macos-latest]
+        node-version: ["18.x", "20.x", "22.x"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm test

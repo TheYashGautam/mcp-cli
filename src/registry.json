@@ -1,0 +1,137 @@
+[
+  {
+    "name": "github",
+    "description": "Read/write GitHub repos, issues, and PRs.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-github",
+    "version": "2025.4.8",
+    "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" }
+  },
+  {
+    "name": "gitlab",
+    "description": "Read/write GitLab projects, issues, and MRs.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-gitlab",
+    "version": "2025.4.25",
+    "env": { "GITLAB_PERSONAL_ACCESS_TOKEN": "${GITLAB_TOKEN}" }
+  },
+  {
+    "name": "filesystem",
+    "description": "Read/write files on the local filesystem within an allowed directory.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-filesystem",
+    "version": "2026.7.10",
+    "extraArgs": ["${FILESYSTEM_ROOT}"],
+    "env": {}
+  },
+  {
+    "name": "memory",
+    "description": "Persistent knowledge-graph memory across sessions.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-memory",
+    "version": "2026.7.4",
+    "env": {}
+  },
+  {
+    "name": "fetch",
+    "description": "Fetch and convert web pages to markdown for the model.",
+    "command": "uvx",
+    "package": "mcp-server-fetch",
+    "version": "2026.7.10",
+    "env": {}
+  },
+  {
+    "name": "sqlite",
+    "description": "Query and inspect a local SQLite database.",
+    "command": "uvx",
+    "package": "mcp-server-sqlite",
+    "version": "2025.4.25",
+    "extraArgs": ["--db-path", "${SQLITE_DB_PATH}"],
+    "env": {}
+  },
+  {
+    "name": "postgres",
+    "description": "Read-only queries against a Postgres database.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-postgres",
+    "version": "0.6.2",
+    "extraArgs": ["${POSTGRES_CONNECTION_STRING}"],
+    "env": {}
+  },
+  {
+    "name": "slack",
+    "description": "Read/post messages in Slack channels.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-slack",
+    "version": "2025.4.25",
+    "env": {
+      "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+      "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+    }
+  },
+  {
+    "name": "puppeteer",
+    "description": "Headless-browser automation and screenshots.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-puppeteer",
+    "version": "2025.5.12",
+    "env": {}
+  },
+  {
+    "name": "brave-search",
+    "description": "Web search via the Brave Search API.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-brave-search",
+    "version": "0.6.2",
+    "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" }
+  },
+  {
+    "name": "google-maps",
+    "description": "Geocoding, directions, and places via Google Maps.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-google-maps",
+    "version": "0.6.2",
+    "env": { "GOOGLE_MAPS_API_KEY": "${GOOGLE_MAPS_API_KEY}" }
+  },
+  {
+    "name": "sentry",
+    "description": "Look up and triage Sentry issues.",
+    "command": "uvx",
+    "package": "mcp-server-sentry",
+    "version": "2025.1.14",
+    "extraArgs": ["--auth-token", "${SENTRY_AUTH_TOKEN}"],
+    "env": {}
+  },
+  {
+    "name": "time",
+    "description": "Timezone conversion and current-time lookups.",
+    "command": "uvx",
+    "package": "mcp-server-time",
+    "version": "2026.7.10",
+    "env": {}
+  },
+  {
+    "name": "everything",
+    "description": "Reference/test server exercising the full MCP protocol surface.",
+    "command": "npx",
+    "package": "@modelcontextprotocol/server-everything",
+    "version": "2026.7.4",
+    "env": {}
+  },
+  {
+    "name": "linear",
+    "description": "Read/write Linear issues and projects.",
+    "command": "npx",
+    "package": "mcp-server-linear",
+    "version": "1.6.0",
+    "env": { "LINEAR_API_KEY": "${LINEAR_API_KEY}" }
+  },
+  {
+    "name": "notion",
+    "description": "Read/write Notion pages and databases.",
+    "command": "npx",
+    "package": "@notionhq/notion-mcp-server",
+    "version": "2.4.1",
+    "env": { "NOTION_API_KEY": "${NOTION_API_KEY}" }
+  }
+]

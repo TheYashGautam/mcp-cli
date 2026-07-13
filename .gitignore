@@ -1,62 +1,18 @@
-# ======================
-# Python
-# ======================
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.egg-info/
-.eggs/
-build/
-dist/
-pip-wheel-metadata/
-*.manifest
-*.spec
-
-# Virtual environments
-.venv/
-env/
-venv/
-ENV/
-
-# ======================
 # Node.js
-# ======================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-package-lock.json
-yarn.lock
-.pnpm-debug.log
 
-# ======================
-# Docker
-# ======================
-*.pid
-*.log
-docker-compose.override.yml
-docker-data/
-.docker/
-.dockerignore
-
-# ======================
-# Secrets & Environment
-# ======================
-secrets.json
-.env
-*.key
-*.pem
-*.crt
-
-# ======================
-# OS / Editor Junk
-# ======================
+# OS / editor junk
 .DS_Store
 Thumbs.db
 *.swp
 *.swo
-.idea/
-.vscode/
-*.bak
+
+# Secrets (defense in depth — mcp-cli itself never writes secrets into this repo)
+.env
+*.key
+*.pem
+*.crt
