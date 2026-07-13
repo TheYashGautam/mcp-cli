@@ -60,3 +60,36 @@ test("backups for different clients don't interfere with each other", () => {
   assert.equal(listBackupsForClient("other-client").length, 1);
   assert.equal(listBackupsForClient("fake-client").length, 10); // unaffected
 });
+
+test("snapshotConfig produces distinct files even when the clock doesn't advance between calls", () => {
+  // Regression test: freezes Date itself (not just a fast loop) so this
+  // doesn't depend on incidental timing luck the way a tight loop would -
+  // a coarser system clock (some CI/virtualized environments) or a fast
+  // enough loop can otherwise land multiple calls in the same millisecond.
+  const RealDate = Date;
+  class FrozenDate extends RealDate {
+    constructor(...args) {
+      if (args.length === 0) return new RealDate(0);
+      return new RealDate(...args);
+    }
+    static now() {
+      return 0;
+    }
+  }
+  global.Date = FrozenDate;
+
+  const frozenConfigPath = path.join(homeDir, "frozen-clock-config.json");
+  try {
+    for (let i = 0; i < 5; i++) {
+      fs.writeFileSync(frozenConfigPath, JSON.stringify({ n: i }));
+      snapshotConfig("frozen-clock-client", frozenConfigPath);
+    }
+  } finally {
+    global.Date = RealDate;
+  }
+
+  const backups = listBackupsForClient("frozen-clock-client");
+  assert.equal(backups.length, 5, "every call must produce a distinct file even with a frozen clock");
+  const latest = JSON.parse(fs.readFileSync(latestBackup("frozen-clock-client"), "utf8"));
+  assert.equal(latest.n, 4, "ordering must still be correct when timestamps tie");
+});

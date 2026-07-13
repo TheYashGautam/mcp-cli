@@ -4,6 +4,15 @@ import { BACKUPS_DIR } from "./paths.js";
 
 const MAX_BACKUPS_PER_CLIENT = 10;
 
+// Disambiguates snapshots taken within the same millisecond (e.g. a tight
+// loop, or a coarser system clock under some CI/virtualized environments) -
+// without it, colliding filenames would silently overwrite each other and
+// quietly break the "keep last N" guarantee. Monotonic within this process,
+// which is enough: two real `mcp` invocations can't land in the same
+// millisecond, and same-process calls are already serialized by the
+// resource lock in clients.js.
+let snapshotSequence = 0;
+
 function ensureBackupsDir() {
   fs.mkdirSync(BACKUPS_DIR, { recursive: true, mode: 0o700 });
 }
@@ -22,7 +31,8 @@ export function snapshotConfig(clientKey, configPath) {
   if (!fs.existsSync(configPath)) return null;
   ensureBackupsDir();
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  const backupPath = path.join(BACKUPS_DIR, `${clientKey}.${ts}.json`);
+  const seq = String(++snapshotSequence).padStart(6, "0");
+  const backupPath = path.join(BACKUPS_DIR, `${clientKey}.${ts}.${seq}.json`);
   fs.copyFileSync(configPath, backupPath);
   fs.chmodSync(backupPath, 0o600);
   pruneBackups(clientKey);
