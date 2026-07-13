@@ -176,6 +176,26 @@ JSON file with an array of entries in this same shape and run `mcp registry
 add <url>` — entries that collide with a bundled server name are rejected
 so an external registry can never shadow a trusted built-in one.
 
+### The canonical registry (opt-in, not the default)
+
+[**mcp-registry**](https://github.com/TheYashGautam/mcp-registry) is a
+separate, CI-validated repo — every entry's pinned package+version is
+checked against the real npm/PyPI registry on every push/PR and weekly
+after that, catching the exact kind of mistake a bundled snapshot can't
+(e.g. an entry that quietly stops resolving after mcp-brew itself was last
+released). Opt into it with:
+
+```bash
+mcp registry add https://raw.githubusercontent.com/TheYashGautam/mcp-registry/main/registry.json
+```
+
+This is **not** fetched automatically — mcp-brew stays zero-network by
+default for `install`/`list`/`search`, exactly as before. Today
+mcp-registry mirrors the bundled entries exactly, so adding it will report
+every entry as skipped (a bundled name always wins on collision, by
+design) — the payoff shows up once the two diverge, e.g. a fix or a new
+server lands in mcp-registry before the next mcp-brew release.
+
 ## Testing
 
 ```bash
