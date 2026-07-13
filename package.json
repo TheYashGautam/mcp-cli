@@ -1,10 +1,10 @@
 {
   "name": "mcp-brew",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Homebrew for MCP — install, configure, and manage Model Context Protocol servers with one command.",
   "type": "module",
   "bin": {
-    "mcp": "./bin/mcp.js"
+    "mcp": "bin/mcp.js"
   },
   "engines": {
     "node": ">=18"

@@ -1,11 +1,24 @@
 # mcp-brew
 
+[![test](https://github.com/TheYashGautam/mcp-cli/actions/workflows/test.yml/badge.svg)](https://github.com/TheYashGautam/mcp-cli/actions/workflows/test.yml)
+[![npm](https://img.shields.io/npm/v/mcp-brew.svg)](https://www.npmjs.com/package/mcp-brew)
+
 **Homebrew for MCP.** Install, configure, and manage Model Context Protocol
 servers for your AI clients with one command — no hand-editing JSON.
 
+> **Status:** early (v0.1.x), solo-maintained, 2 client targets (Claude
+> Code, Claude Desktop) and 16 bundled servers so far. Core install/upgrade/
+> rollback path is tested and CI-green on macOS + Linux; see
+> [Roadmap](#roadmap) for what's explicitly not done yet.
+
+Requires **Node.js >=18**. Individual servers may additionally need `npx`
+(bundled with Node) or `uvx` ([install uv](https://docs.astral.sh/uv/getting-started/installation/))
+depending on which one you install — `mcp doctor` tells you which, if any,
+is missing.
+
 ```bash
 mcp search github
-mcp secrets set GITHUB_TOKEN=ghp_xxx
+mcp secrets set GITHUB_TOKEN
 mcp install github
 mcp status
 ```
@@ -151,7 +164,15 @@ Claude Desktop, etc.), not long-running daemons this CLI supervises. So:
 
 ## Adding a server to the registry
 
-Edit `src/registry.json`:
+**Want to contribute a new server?** Open a PR against
+[**mcp-registry**](https://github.com/TheYashGautam/mcp-registry) instead
+of this repo — it's CI-validated on every PR and doesn't require a
+mcp-brew release to take effect. Editing `src/registry.json` here is only
+for servers you want *bundled* (shipped inside the CLI itself, available
+offline with zero setup), which is a higher bar since it ships to everyone
+on the next release.
+
+Either way, the entry shape is the same:
 
 ```json
 {
@@ -228,6 +249,22 @@ which is also why the Windows secret backend above is unverified.
 - [ ] A real community-reviewed registry/tap system (`mcp registry add
       <url>` is a deliberately small first step toward this, not a
       replacement for it)
+
+## Privacy
+
+mcp-brew makes no calls to any analytics/telemetry endpoint, ever. The only
+outbound network calls it makes are: `npx`/`uvx` fetching a server package
+during install (same as running those tools yourself), `mcp upgrade`
+checking npm/PyPI for a version number, and `mcp registry add` fetching a
+URL you explicitly gave it. Everything else — `list`, `search`, `status`,
+`doctor`, `install` against an already-cached package — is local-only.
+
+## Contributing
+
+Bug reports and PRs welcome. Run `npm test` before opening a PR (also
+enforced by CI and by `prepublishOnly`). See [Adding a server to the
+registry](#adding-a-server-to-the-registry) if you specifically want to add
+a new MCP server rather than change the CLI itself.
 
 ## License
 
