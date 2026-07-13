@@ -1,5 +1,5 @@
 {
-  "name": "mcp-cli",
+  "name": "mcp-brew",
   "version": "0.1.0",
   "description": "Homebrew for MCP — install, configure, and manage Model Context Protocol servers with one command.",
   "type": "module",
@@ -10,8 +10,33 @@
     "node": ">=18"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheYashGautam/mcp-cli.git"
+  },
+  "homepage": "https://github.com/TheYashGautam/mcp-cli#readme",
+  "bugs": {
+    "url": "https://github.com/TheYashGautam/mcp-cli/issues"
+  },
+  "author": "TheYashGautam",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cli",
+    "package-manager",
+    "claude",
+    "claude-code",
+    "claude-desktop"
+  ],
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "prepublishOnly": "npm test"
   },
   "dependencies": {
     "commander": "^12.1.0"

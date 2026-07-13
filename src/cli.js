@@ -11,6 +11,9 @@ import { listCommand, searchCommand } from "./commands/discover.js";
 import { secretsSetCommand, secretsListCommand, secretsUnsetCommand } from "./commands/secrets.js";
 import { rollbackCommand } from "./commands/rollback.js";
 import { registryAddCommand, registryListCommand, registryRemoveCommand } from "./commands/registrySources.js";
+import { upgradeCommand } from "./commands/upgrade.js";
+import { pinCommand, unpinCommand } from "./commands/pin.js";
+import { doctorCommand } from "./commands/doctor.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8"));
@@ -57,6 +60,29 @@ program
   .command("status")
   .description("Show installed MCP servers and whether they're active")
   .action(statusCommand);
+
+program
+  .command("upgrade [name]")
+  .description("Check the upstream registry for a newer version and reinstall if found")
+  .option("--all", "upgrade every installed server (skips pinned ones)")
+  .option("--force", "upgrade even a pinned server")
+  .option("--dry-run", "preview what would happen without writing anything")
+  .action(upgradeCommand);
+
+program
+  .command("pin <name>")
+  .description("Exclude an installed server from \"mcp upgrade --all\"")
+  .action(pinCommand);
+
+program
+  .command("unpin <name>")
+  .description("Allow an installed server to be upgraded by \"mcp upgrade --all\" again")
+  .action(unpinCommand);
+
+program
+  .command("doctor")
+  .description("Check runtimes, client configs, secrets backend, and locks for problems")
+  .action(doctorCommand);
 
 program
   .command("rollback <client>")

@@ -63,7 +63,7 @@ export function installCommand(name, opts) {
   for (const target of targets) {
     writeServer(target, name, resolvedServer);
   }
-  recordInstall(name, { targets, server: resolvedServer });
+  recordInstall(name, { targets, server: resolvedServer, version: server.version });
 
   console.log(`Installed "${name}" for: ${targets.map((t) => CLIENTS[t].label).join(", ")}`);
   console.log("Restart the client for the change to take effect.");

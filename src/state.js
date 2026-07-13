@@ -10,13 +10,15 @@ export function saveState(state) {
   writeJsonAtomic(STATE_FILE, state);
 }
 
-export function recordInstall(name, { targets, server }) {
+export function recordInstall(name, { targets, server, version, enabled = true, pinned = false }) {
   withLock(STATE_FILE, () => {
     const state = loadState();
     state.installed[name] = {
       server,
+      version,
       targets,
-      enabled: true,
+      enabled,
+      pinned,
       installedAt: new Date().toISOString(),
     };
     saveState(state);
@@ -28,6 +30,16 @@ export function setEnabled(name, enabled) {
     const state = loadState();
     if (!state.installed[name]) return false;
     state.installed[name].enabled = enabled;
+    saveState(state);
+    return true;
+  });
+}
+
+export function setPinned(name, pinned) {
+  return withLock(STATE_FILE, () => {
+    const state = loadState();
+    if (!state.installed[name]) return false;
+    state.installed[name].pinned = pinned;
     saveState(state);
     return true;
   });
@@ -45,4 +57,8 @@ export function removeInstall(name) {
 
 export function getInstall(name) {
   return loadState().installed[name] ?? null;
+}
+
+export function listInstalled() {
+  return Object.keys(loadState().installed);
 }

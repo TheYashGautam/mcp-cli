@@ -1,4 +1,4 @@
-# mcp-cli
+# mcp-brew
 
 **Homebrew for MCP.** Install, configure, and manage Model Context Protocol
 servers for your AI clients with one command — no hand-editing JSON.
@@ -13,8 +13,15 @@ mcp status
 ## Install
 
 ```bash
+npm install -g mcp-brew   # exposes the `mcp` command globally
+```
+
+Working on mcp-brew itself instead? Clone the repo and use `npm link` in
+place of the global install:
+
+```bash
 npm install
-npm link   # exposes the `mcp` command globally
+npm link
 ```
 
 ## Commands
@@ -30,9 +37,12 @@ npm link   # exposes the `mcp` command globally
 | `mcp up <name> [--dry-run]` | Re-write a previously installed server into its client config(s) |
 | `mcp down <name> [--dry-run]` | Remove a server from client config(s) without forgetting it — `mcp up` restores it |
 | `mcp uninstall <name>` | Remove config and forget the server entirely |
-| `mcp status` | Show installed servers and whether they're active per client |
+| `mcp status` | Show installed servers, their version, pinned state, and whether they're active per client |
 | `mcp rollback <client> [--list]` | Restore a client's config from the most recent mcp-cli backup (or list available backups) |
 | `mcp registry add/list/remove <url>` | Add, list, or remove additional server registries fetched from a URL |
+| `mcp upgrade [name\|--all] [--force] [--dry-run]` | Check the live npm/PyPI registry for a newer version and reinstall if found |
+| `mcp pin <name>` / `mcp unpin <name>` | Exclude (or re-include) an installed server from `mcp upgrade --all` |
+| `mcp doctor` | Check runtimes, client configs, secrets backend, and stale locks for problems |
 
 Supported clients today: **Claude Code** (`~/.claude.json`) and **Claude
 Desktop** (`claude_desktop_config.json`). `mcp install` auto-detects which
@@ -56,6 +66,22 @@ reproduce exactly what was originally installed.
 bytes — pinning the version is what makes the *result* reproducible; it
 doesn't add a second, separate checksum layer on top.)
 
+## Upgrading and pinning
+
+`mcp install` pins whatever version is baked into the registry at that
+moment. `mcp upgrade <name>` (or `mcp upgrade --all`) is the deliberate,
+opt-in way to move forward from there — it queries the live npm/PyPI
+registry directly (independent of the bundled `src/registry.json`), shows
+the version diff, and only reinstalls if you're not on a dry run. The same
+backup/rollback safety net from installs applies to upgrades.
+
+- `mcp upgrade --all` skips any server you've `mcp pin`ned; `--force`
+  overrides a pin for a single named upgrade without unpinning it.
+- Upgrading a server that's currently `down` updates the recorded version
+  for next time but does **not** touch client config or bring it back up —
+  matching the same "don't do things the user didn't ask for" rule the rest
+  of the safety model follows.
+
 ## Safety: preflight checks, locking, and backups
 
 - **Runtime preflight**: before writing anything, `mcp install` checks that
@@ -77,6 +103,11 @@ doesn't add a second, separate checksum layer on top.)
 - **No raw crashes**: any unexpected failure (locked keychain, malformed
   config, etc.) is caught and printed as a one-line `Error: ...` with a
   non-zero exit code, never a Node stack trace.
+- **`mcp doctor`**: a holistic health check — Node version, whether every
+  runtime referenced by the registry (and by what's actually installed) is
+  on `PATH`, whether client configs are valid JSON with sane permissions,
+  which secrets backend is active, and whether any stale lock files are
+  lying around.
 
 ## How secrets work
 
@@ -155,12 +186,15 @@ The suite (`test/*.test.js`) covers atomic file writes and permission
 preservation, registry loading/search/pinning/external-source merging,
 secret substitution and the file-backend store, client config read/write
 (including permission and unrelated-key preservation), install-state
-bookkeeping, backup snapshot/prune/restore, runtime preflight checks, and
-cross-process file locking (including stale-lock reclaim and genuine
-timeout). Every test runs against a temp `$HOME` and forces the file-based
-secrets backend, so `npm test` never touches your real config files or OS
-secret store. CI (`.github/workflows/test.yml`) runs this on Linux and
-macOS across Node 18/20/22 — Windows is excluded from CI because Node's
+bookkeeping (including version/pinned tracking), backup snapshot/prune/
+restore, runtime preflight checks, cross-process file locking (including
+stale-lock reclaim and genuine timeout), `mcp upgrade`/`mcp pin` decision
+logic (via an injected fake version-fetch — no real network calls), and
+`mcp doctor`'s checks (malformed JSON, unsafe permissions, stale locks).
+Every test runs against a temp `$HOME` and forces the file-based secrets
+backend, so `npm test` never touches your real config files or OS secret
+store. CI (`.github/workflows/test.yml`) runs this on Linux and macOS across
+Node 18/20/22 — Windows is excluded from CI because Node's
 `fs.chmodSync`/`stat().mode` don't carry real POSIX permission bits there,
 which is also why the Windows secret backend above is unverified.
 
